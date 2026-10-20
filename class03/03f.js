@@ -1,0 +1,41 @@
+import { createServer } from "http";
+import { writeFile } from "node:fs";
+
+let controller = [
+    {
+        name: "/sum",
+        func: function (request, response) {
+            console.log("this is for test");
+            response.writeHead(200);
+            let num = request.url.split("/");
+            let result = Number(num[2]) + Number(num[3]);
+            response.write(result.toString());
+            response.end();
+        }
+    }, 
+    {
+        name: "/createFile",
+        func: function (request, response) {
+            let file = request.url.split("/");
+            writeFile(file[2], file[3], function() {
+                console.log("created file successfully");
+            });
+            let result = "created file successfully";
+            response.writeHead(200);
+            response.write(result);
+            response.end();
+        }
+    }
+]; 
+
+function Responses(request, response) {
+    for (let i = 0; i < controller.length; i++) {
+        if (request.url.startsWith(controller[i].name)) {
+            controller[i].func(request, response);
+            break;
+        }
+    }
+}
+
+let server = createServer(Responses);
+server.listen(8080);
