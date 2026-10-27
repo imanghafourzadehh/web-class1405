@@ -12,23 +12,22 @@ app.get('sum', function (request, response){
 });
 
 app.get('readfile', function (request, response){
-        let file = request.url.split("/");
-        readFile(file[2], function(errr) {
-
-            if (errr) {
-                console.log("err",errr)
-                let result = "created file fail";
-                response.writeHead(500);
-                response.write(result);
-                response.end();
-                    
-            }
-            console.log("readfile successfully   ");
-        });
-        let result = "created file successfully";
-        response.writeHead(200);
-        response.write(result);
-        response.end();
+    let file = request.url.split("/");
+    readFile(file[2],function(error,data) {
+        if (error) {
+            let error = "readfile fail";
+            response.writeHead(400);
+            response.write(error);
+            response.end();
+            
+        }
+        else{
+            console.log("readfile successfully");
+            response.write(data);
+            response.end();
+        }
+        
+    });
 });
 
 app.get('creatfile', function (request, response){
@@ -52,51 +51,42 @@ app.get('creatfile', function (request, response){
             response.end();
 });
 
-app.get('unlink', function (request, response){
-            let file = request.url.split("/");
-            unlink(file[2],function(errr) {
-
-                if (errr) {
-                    console.log("err",errr)
-                    let result = "delet file fail";
-                    response.writeHead(500);
-                    response.write(result);
-                    response.end();
-                    
-                }  
-                let result = "delete file successfully";
-                response.writeHead(200);
-                response.write(result);
-                response.end();})
-
-
+app.get('/unlink', function (request, response) {
+    let file = request.url.split("/");
+    
+    unlink(file[2], function (errr) {
+        if (errr) {
+            console.log("err", errr);
+            let result = "delete file fail";
+            response.writeHead(500);
+            response.write(result);
+            response.end();
+        } else { 
+            let result = "delete file successfully";
+            response.writeHead(200);
+            response.write(result);
+            response.end();
+        } 
+    }); 
 });
 
-app.get('delete', function (request, response){
-            let file = request.url.split("/");
-            rmdir(file[2],function(errr) {
-
-                if (errr) {
-                    console.log("err",errr)
-                    let result = "delet file fail";
-                    response.writeHead(500);
-                    response.write(result);
-                    response.end();
-                    
-                } 
-                let result = "delete successfully";
-                response.writeHead(200);
-                response.write(result);
-                response.end();
-})
-
-
+app.get('/delete', function (request, response) {
+    let file = request.url.split("/");
+    fs.rm(file[2], { recursive: true, force: true }, function(errr) {
+        if (errr) {
+            console.log("err", errr);
+            let result = "delete folder fail";
+            response.writeHead(500);
+            response.write(result);
+            response.end();
+        } else { 
+            let result = "delete successfully";
+            response.writeHead(200);
+            response.write(result);
+            response.end();
+        } 
+    }); 
 });
-
-
-
-
-
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`);
 });
