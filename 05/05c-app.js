@@ -1,161 +1,152 @@
-import framework from './05b-framwork.js';
-import { writeFile, readFile, unlink, rm } from "node:fs";
+import { framework }  from './05b-framework.js';
+import { writeFile, readFile, unlink, rmdir } from 'node:fs';
 
 const app = framework();
 const port = 3000;
 
-app.get('/sum', function (request, response) {
+app.get('sum', function(request, response){
     let items = request.url.split("/");
-    const a = Number(items[2]);
-    const b = Number(items[3]);
-
-    if (Number.isNaN(a) || Number.isNaN(b)) {
-        response.writeHead(400);
-        response.write("invalid numbers");
-        response.end();
-        return;
-    }
-
     response.writeHead(200);
-    response.write((a + b).toString());
+    response.write((Number(items[2]) + Number(items[3])).toString());
     response.end();
 });
-app.get('/readfile', function (request, response) {
-    let file = request.url.split("/");
 
-    if (!file[2]) {
-        response.writeHead(400);
-        response.write("file path is required");
-        response.end();
-        return;
-    }
-
-    readFile(file[2], function (error, data) {
-        if (error) {
-            response.writeHead(400);
-            response.write("readfile fail: " + error.message);
-            response.end();
-            return;
-        }
-        response.writeHead(200);
-        response.write(data);
-        response.end();
-    });
-});
-app.get('/createfile', function (request, response) {
+app.get('createFile', function (request, response){
     let items = request.url.split("/");
 
-    if (!items[2]) {
-        response.writeHead(400);
-        response.write("file name is required");
-        response.end();
-        return;
-    }
-    const content = items.slice(3).join("/");
-
-    writeFile(items[2], content, function (err) {
-        if (err) {
+    writeFile(items[2], items[3], function(error){
+        if(error){
+            console.log('error', error);
             response.writeHead(500);
-            response.write("created file fail: " + err.message);
+            response.write("createFile error");
             response.end();
-            return;
         }
-        response.writeHead(200);
-        response.write("created file successfully");
-        response.end();
-    });
-});
-app.get('/unlink', function (request, response) {
-    let file = request.url.split("/");
+        else{
+            console.log(3);
+            console.log("createFile done");
 
-    if (!file[2]) {
-        response.writeHead(400);
-        response.write("file path is required");
-        response.end();
-        return;
-    }
-
-    unlink(file[2], function (err) {
-        if (err) {
-            response.writeHead(500);
-            response.write("delete file fail: " + err.message);
-            response.end();
-            return;
-        }
-        response.writeHead(200);
-        response.write("delete file successfully");
-        response.end();
-    });
-});
-app.get('/delete', function (request, response) {
-    let file = request.url.split("/");
-
-    if (!file[2]) {
-        response.writeHead(400);
-        response.write("path is required");
-        response.end();
-        return;
-    }
-
-    rm(file[2], { recursive: true, force: true }, function (err) {
-        if (err) {
-            response.writeHead(500);
-            response.write("delete fail: " + err.message);
-            response.end();
-            return;
-        }
-        response.writeHead(200);
-        response.write("delete successfully");
-        response.end();
-    });
-});
-
-
-app.get('/signup', function (request, response) {
-    if (!request.data) {
-        response.writeHead(400);
-        response.write("body is required (send JSON with -d)");
-        response.end();
-        return;
-    }
-
-    let newUser;
-    try {
-        newUser = JSON.parse(request.data);
-    } catch (e) {
-        response.writeHead(400);
-        response.write("invalid JSON body");
-        response.end();
-        return;
-    }
-
-    
-    readFile('db.json', function (error, body) {
-        let users = [];
-        if (!error && body.toString().trim() !== '') {
-            try {
-                users = JSON.parse(body.toString());
-            } catch (e) {
-                users = [];   
-            }
-        }
-
-        users.push(newUser);
-
-        writeFile('db.json', JSON.stringify(users, null, 2), function (err) {
-            if (err) {
-                response.writeHead(500);
-                response.write("signup error: " + err.message);
-                response.end();
-                return;
-            }
             response.writeHead(200);
-            response.write("signup done");
+            response.write("createFile done");
             response.end();
-        });
+            console.log(4);
+        }                
     });
 });
 
-app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`);
+app.get('readFile', function (request, response){
+    let items = request.url.split("/");
+
+    readFile(items[2], function(error, body){
+        if(error){
+            response.writeHead(500);
+            response.write("readFile error");
+            response.end();
+        }
+        else{
+            console.log("readFile done");
+
+            response.writeHead(200);
+            response.write(body);
+            response.end();
+        }                
+    });
+});
+
+app.get('deleteFile', function(request, response){
+    let items = request.url.split("/");
+
+    unlink(items[2], function(error){
+        if(error){
+            console.log("deleteFile error", error);
+
+            response.writeHead(500);
+            response.write("deleteFile error");
+            response.end();
+        }
+        else{
+            console.log("deleteFile done");
+
+            response.writeHead(200);
+            response.write("deleteFile done");
+            response.end();
+        }
+    });
+});
+
+app.get('delete', function(request, response){
+    let items = request.url.split("/");
+
+    unlink(items[2], function(error){
+        if(error){
+            console.log("deleteFile error", error);
+            if(error.code === 'EPERM'){
+                rmdir(items[2], function(error){
+                    if(error){
+                        console.log("delete error", error);
+
+                        response.writeHead(500);
+                        response.write("delete error");
+                        response.end();
+                    }
+                    else{
+                        console.log("delete done (folder)");
+
+                        response.writeHead(200);
+                        response.write("delete done");
+                        response.end();
+                    }
+                });
+            }
+        }
+        else{
+            console.log("delete done (file)");
+
+            response.writeHead(200);
+            response.write("delete done");
+            response.end();
+        }
+    });
+
+});
+
+app.get('signup', function(request, response){
+    let items = request.url.split("/");
+
+    readFile('db.json', function(error, fileData){
+        if(error){
+            console.log("error reading db.json", error)
+            response.writeHead(200);
+            response.write("error reading db.json");
+            response.end();
+        }
+        else{
+            fileData = fileData.toString();
+            let newData = fileData + request.data;
+            console.log('newData', newData)
+
+            writeFile('db.json', newData, function(error){
+                if(error){
+                    console.log("error writing db.json", error)
+
+                    response.writeHead(500);
+                    response.write("signup error");
+                    response.end();
+                }
+                else{
+                    console.log("signup done");
+
+                    response.writeHead(200);
+                    response.write("signup done");
+                    response.end();
+                }
+            });
+        }
+    });
+
+
+
+});
+
+app.listen(port, function(){
+  console.log('app listening on port: ', port);
 });
