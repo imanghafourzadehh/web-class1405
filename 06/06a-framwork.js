@@ -22,14 +22,17 @@ function framework(){
                     console.log("(framework) data:", data);
 
                     let found = false;
-                    try{ request.data=JSON.parse(data)
+                    try {
+                        // تلاش برای تبدیل داده به JSON
+                        request.data = JSON.parse(data);
                     }
                     catch(e){
-                        request.data=data
+                        // اگر JSON نبود، همان رشته خام قرار گیرد
+                        request.data = data;
                     }
                     
-                    request.data = data;
                     request.myKey = 'salam!';
+                    
                     for(let item of controllers){
                         if(request.url.startsWith('/' + item.name)){
                             console.log("(framework) controller: ", item.name);
@@ -38,8 +41,12 @@ function framework(){
                             break;
                         }
                     }
+                    
+                    // اگر مسیر پیدا نشد حتماً باید پاسخ فرستاده شود تا سوکت بسته نشود
                     if(!found){
                         console.log("path not found.");
+                        response.writeHead(404, { 'Content-Type': 'text/plain' });
+                        response.end("Path not found");
                     }
                 });
             }

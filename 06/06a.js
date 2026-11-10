@@ -1,4 +1,4 @@
-import { framework }  from './06a-framework.js';
+import { framework }  from './06a-framwork.js';
 import { writeFile, readFile, unlink, rmdir } from 'node:fs';
 import { json } from 'stream/consumers';
 
@@ -124,7 +124,7 @@ app.get('signup', function(request, response){
             fileData = fileData.toString();
             fileData=JSON.parse(fileData);
             fileData.data.push(request.data)
-            let newData = json.stringify(fileData)
+            let newData = JSON.stringify(fileData)
 
 
             writeFile('db.json', newData, function(error){

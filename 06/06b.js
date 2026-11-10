@@ -128,7 +128,7 @@ app.get('signup', function(request, response){
             fileData=JSON.parse(fileData);
             fileData.id.push(10000000,getRandomInt,1000000)
             fileData.data.push(request.data)
-            let newData = json.stringify(fileData)
+            let newData = JSON.stringify(fileData)
             writeFile('db.json', newData, function(error){
                 if(error){
                     console.log("error writing db.json", error)
