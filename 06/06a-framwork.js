@@ -23,11 +23,11 @@ function framework(){
 
                     let found = false;
                     try {
-                        // تلاش برای تبدیل داده به JSON
+                        
                         request.data = JSON.parse(data);
                     }
                     catch(e){
-                        // اگر JSON نبود، همان رشته خام قرار گیرد
+                        
                         request.data = data;
                     }
                     
@@ -42,7 +42,6 @@ function framework(){
                         }
                     }
                     
-                    // اگر مسیر پیدا نشد حتماً باید پاسخ فرستاده شود تا سوکت بسته نشود
                     if(!found){
                         console.log("path not found.");
                         response.writeHead(404, { 'Content-Type': 'text/plain' });
